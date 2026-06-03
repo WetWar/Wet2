@@ -7,6 +7,7 @@ import asyncio
 import logging
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import BotCommand
 
 from config import settings
 from handlers import router
@@ -24,6 +25,13 @@ async def main():
     bot = Bot(token=settings.BOT_TOKEN)
     dp = Dispatcher(storage=MemoryStorage())
 
+	# Устанавливаем меню команд
+    await bot.set_my_commands([
+        BotCommand(command="now",       description="🌡 Погода сейчас"),
+        BotCommand(command="hourly",    description="⏱ Прогноз на ближайшие часы"),
+        BotCommand(command="city",      description="🏙 Сменить город"),
+        BotCommand(command="subscribe", description="💎 Premium подписка"),
+    ])
     # Подключаем роутер с хэндлерами
     dp.include_router(router)
 
