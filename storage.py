@@ -12,9 +12,13 @@ from typing import Optional
 
 # ──────────────────────────── пути к файлам ────────────────────────────
 
-CITIES_FILE   = "user_cities.json"
-LIMITS_FILE   = "user_limits.json"
-PREMIUM_FILE  = "user_premium.json"
+import pathlib
+DATA_DIR = pathlib.Path("/app/data")
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+CITIES_FILE   = DATA_DIR / "user_cities.json"
+LIMITS_FILE   = DATA_DIR / "user_limits.json"
+PREMIUM_FILE  = DATA_DIR / "user_premium.json"
 
 
 def _load(path: str) -> dict:
