@@ -3,25 +3,27 @@
   - user_cities.json   — города пользователей
   - user_limits.json   — счётчики запросов (сбрасываются каждый день)
   - user_premium.json  — флаги премиум-подписки
+  - user_langs.json    — язык интерфейса пользователя (ru / en)
 """
 
 import json
 import os
+import pathlib
 from datetime import date
 from typing import Optional
 
 # ──────────────────────────── пути к файлам ────────────────────────────
 
-import pathlib
 DATA_DIR = pathlib.Path("/app/data")
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-CITIES_FILE   = DATA_DIR / "user_cities.json"
-LIMITS_FILE   = DATA_DIR / "user_limits.json"
-PREMIUM_FILE  = DATA_DIR / "user_premium.json"
+CITIES_FILE  = DATA_DIR / "user_cities.json"
+LIMITS_FILE  = DATA_DIR / "user_limits.json"
+PREMIUM_FILE = DATA_DIR / "user_premium.json"
+LANGS_FILE   = DATA_DIR / "user_langs.json"
 
 
-def _load(path: str) -> dict:
+def _load(path) -> dict:
     if not os.path.exists(path):
         return {}
     with open(path, "r", encoding="utf-8") as f:
@@ -31,9 +33,23 @@ def _load(path: str) -> dict:
             return {}
 
 
-def _save(path: str, data: dict) -> None:
+def _save(path, data: dict) -> None:
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+
+
+# ──────────────────────────── язык ──────────────────────────────────────
+
+def get_lang(user_id: int) -> Optional[str]:
+    """Возвращает 'ru', 'en' или None (язык не выбран)."""
+    data = _load(LANGS_FILE)
+    return data.get(str(user_id))
+
+
+def set_lang(user_id: int, lang: str) -> None:
+    data = _load(LANGS_FILE)
+    data[str(user_id)] = lang
+    _save(LANGS_FILE, data)
 
 
 # ──────────────────────────── города ────────────────────────────────────
@@ -57,7 +73,7 @@ def get_all_users_with_cities() -> dict:
 # ──────────────────────────── лимиты ────────────────────────────────────
 
 def _today() -> str:
-    return date.today().isoformat()  # "2025-06-01"
+    return date.today().isoformat()
 
 
 def get_requests_today(user_id: int) -> int:
@@ -73,10 +89,8 @@ def increment_requests(user_id: int) -> int:
     data = _load(LIMITS_FILE)
     uid = str(user_id)
     entry = data.get(uid, {})
-
     if entry.get("date") != _today():
         entry = {"date": _today(), "count": 0}
-
     entry["count"] += 1
     data[uid] = entry
     _save(LIMITS_FILE, data)
